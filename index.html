@@ -6,210 +6,293 @@
 <title>Maktab AI</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{
-  --bg:#16140f; --card:#211e16; --line:#383324;
-  --gold:#d4a937; --gold-soft:#f0d98a; --text:#f3eee0; --muted:#9a927c;
-  --nav-h:68px;
-}
+:root{--bg:#14120d;--card:#1f1b13;--card2:#292419;--line:#3a3322;--gold:#d9ac3c;--gold2:#f2dc90;--text:#f4efe1;--muted:#9d957e;--ok:#5fae6e;--bad:#cc5b4b;--nav:64px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
-h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:700}
-#app{max-width:520px;margin:0 auto;min-height:100%;padding:20px 16px calc(var(--nav-h) + 28px)}
-.page{display:none}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif}
+#app{max-width:520px;margin:0 auto;padding:16px 16px calc(var(--nav) + 28px)}
+.page{display:none;animation:in .25s ease}
 .page.active{display:block}
-header{margin-bottom:18px}
-header h1{font-size:26px;color:var(--gold-soft)}
-header p{color:var(--muted);font-size:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
-.card h2{font-size:18px;margin-bottom:6px}
-.card p{color:var(--muted);font-size:14px}
-.subjects{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.subject{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 12px;color:var(--text);font-size:16px;font-weight:600;cursor:pointer;text-align:center}
-.subject.on{border-color:var(--gold);background:#2b2516;color:var(--gold-soft)}
-.subject span{display:block;font-size:28px;margin-bottom:4px}
-textarea,input{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;resize:none}
-textarea:focus,input:focus{outline:2px solid var(--gold);outline-offset:1px}
-.btn{width:100%;background:var(--gold);color:#1b1608;border:0;border-radius:10px;padding:13px;font-size:16px;font-weight:700;cursor:pointer;margin-top:10px}
-.btn:active{filter:brightness(.9)}
-.btn.ghost{background:transparent;color:var(--gold-soft);border:1px solid var(--gold)}
-.answer{margin-top:12px;white-space:pre-wrap;font-size:15px}
-.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:8px;font-size:15px;cursor:pointer}
-.opt.right{border-color:#5fae6e;background:#1a2a1d}
-.opt.wrong{border-color:#c75a4a;background:#2e1a17}
-.note{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-.note button{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer}
-.avatar{width:84px;height:84px;border-radius:50%;background:var(--card);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:34px;font-family:Georgia,serif;color:var(--gold-soft);margin:6px auto 12px;overflow:hidden}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{background:linear-gradient(135deg,#2e2512,#1f1b13 70%);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:14px}
+.hero small{color:var(--gold);letter-spacing:.08em;text-transform:uppercase;font-size:11px;font-weight:700}
+.hero h1{font-size:26px;color:var(--gold2);margin:2px 0}
+.hero p{color:var(--muted);font-size:14px}
+.stats{display:flex;gap:10px;margin-top:14px}
+.stat{flex:1;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center}
+.stat b{display:block;font-size:19px;color:var(--gold2)}
+.stat span{font-size:11px;color:var(--muted)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:10px}
+.seg button{background:none;border:0;color:var(--muted);padding:10px;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--gold);color:#1b1608}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;background:var(--card);border:1px solid var(--line);color:var(--gold2);border-radius:20px;padding:7px 13px;font-size:13px;cursor:pointer}
+.chat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:200px;max-height:48vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.empty{margin:auto;text-align:center;color:var(--muted);font-size:14px;padding:20px}
+.msg{max-width:86%;padding:10px 13px;border-radius:14px;font-size:15px;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--gold);color:#1b1608;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.typing{color:var(--muted);font-style:italic}
+.send{display:flex;gap:8px;margin-top:10px}
+input,textarea{flex:1;min-width:0;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit}
+input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.btn{background:var(--gold);color:#1b1608;border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.btn:active{filter:brightness(.88)}
+.btn.full{width:100%;margin-top:10px}
+.btn:disabled{opacity:.5}
+.head{margin:4px 2px 14px}
+.head h1{font-size:25px;color:var(--gold2)}
+.head p{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{font-size:19px;margin:4px 0 8px}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .3s}
+.meta{color:var(--muted);font-size:13px}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:8px;font-size:15px;cursor:pointer}
+.opt.right{border-color:var(--ok);background:#18271b}
+.opt.wrong{border-color:var(--bad);background:#2d1a17}
+.big{font-size:44px;font-family:Georgia,serif;color:var(--gold2);text-align:center;margin:6px 0}
+.note{display:flex;align-items:center;gap:12px}
+.note .t{flex:1;font-size:15px}
+.note .t small{display:block;color:var(--muted);font-size:12px}
+.note.done .t span{text-decoration:line-through;color:var(--muted)}
+.chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--gold);background:none;color:#1b1608;cursor:pointer;flex:none;font-weight:700}
+.note.done .chk{background:var(--gold)}
+.del{background:none;border:0;color:var(--muted);font-size:18px;cursor:pointer;padding:4px}
+.avatar{width:92px;height:92px;border-radius:50%;border:3px solid var(--gold);background:var(--card2);display:flex;align-items:center;justify-content:center;font:700 38px Georgia,serif;color:var(--gold2);margin:0 auto 10px;overflow:hidden}
 .avatar img{width:100%;height:100%;object-fit:cover}
 .center{text-align:center}
-.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.lvl{display:inline-block;background:var(--card2);border:1px solid var(--gold);color:var(--gold2);border-radius:20px;padding:3px 12px;font-size:13px;margin-top:6px}
+.row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
 .row:last-child{border:0}
-.row b{color:var(--gold-soft)}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.row b{color:var(--gold2)}
+nav{position:fixed;left:0;right:0;bottom:0;background:rgba(31,27,19,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav div{max-width:520px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-nav button{background:none;border:0;color:var(--muted);height:var(--nav-h);font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-nav button .ic{font-size:22px}
+nav button{background:none;border:0;color:var(--muted);height:var(--nav);font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative}
+nav button svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav button.active{color:var(--gold)}
-nav button:focus-visible,.subject:focus-visible,.opt:focus-visible,.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+nav button.active::before{content:"";position:absolute;top:0;width:28px;height:3px;border-radius:0 0 3px 3px;background:var(--gold)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Bosh sahifa -->
-  <section class="page active" id="home">
-    <header>
-      <h1>Salom, <span class="uname">o'quvchi</span>!</h1>
-      <p>Qaysi fan bo'yicha yordam kerak?</p>
-    </header>
-    <div class="subjects">
-      <button class="subject on" data-subject="math"><span>➗</span>Matematika</button>
-      <button class="subject" data-subject="english"><span>🔤</span>Ingliz tili</button>
+<section class="page active" id="home">
+  <div class="hero">
+    <small>Maktab AI</small>
+    <h1>Salom, <span class="uname">o'quvchi</span>!</h1>
+    <p>Bugun nimani o'rganamiz?</p>
+    <div class="stats">
+      <div class="stat"><b id="sPts">0</b><span>ball</span></div>
+      <div class="stat"><b id="sAsk">0</b><span>savol</span></div>
+      <div class="stat"><b id="sLvl">1</b><span>daraja</span></div>
     </div>
-    <div class="card">
-      <textarea id="question" rows="4" placeholder="Savolingizni yozing..."></textarea>
-      <button class="btn" id="askBtn">Savol berish</button>
-      <div class="answer" id="answer"></div>
-    </div>
-  </section>
+  </div>
+  <div class="seg" id="seg">
+    <button class="on" data-s="math">➗ Matematika</button>
+    <button data-s="english">🔤 Ingliz tili</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="chat" id="chat"><div class="empty" id="empty">Savol bering yoki yuqoridagi namunalardan birini tanlang.</div></div>
+  <div class="send">
+    <input id="q" type="text" placeholder="Savolingizni yozing..." autocomplete="off">
+    <button class="btn" id="go">Yuborish</button>
+  </div>
+</section>
 
-  <!-- Quiz -->
-  <section class="page" id="quiz">
-    <header>
-      <h1>Quiz</h1>
-      <p>Bilimingizni sinab ko'ring</p>
-    </header>
-    <div class="card" id="quizCard"></div>
-  </section>
+<section class="page" id="quiz">
+  <div class="head"><h1>Quiz</h1><p>Bilimingizni sinang, har to'g'ri javob +10 ball</p></div>
+  <div class="seg" id="qseg">
+    <button class="on" data-s="all">Aralash</button>
+    <button data-s="math">Matematika</button>
+  </div>
+  <div class="seg" id="qseg2" style="margin-top:-2px">
+    <button data-s="english">Ingliz tili</button>
+    <button data-s="all2" disabled style="opacity:.35">Tez kunda</button>
+  </div>
+  <div class="card" id="quizCard"></div>
+</section>
 
-  <!-- Kundalik -->
-  <section class="page" id="diary">
-    <header>
-      <h1>Kundalik</h1>
-      <p>Eslatmalaringiz shu yerda saqlanadi</p>
-    </header>
-    <div class="card">
-      <input id="noteInput" type="text" placeholder="Masalan: Juma kuni matematika testi">
-      <button class="btn" id="addNote">Eslatma qo'shish</button>
-    </div>
-    <div id="notes"></div>
-  </section>
+<section class="page" id="diary">
+  <div class="head"><h1>Kundalik</h1><p>Vazifa va eslatmalaringiz</p></div>
+  <div class="send" style="margin:0 0 12px">
+    <input id="noteIn" type="text" placeholder="Masalan: Juma kuni test" autocomplete="off">
+    <button class="btn" id="addNote">Qo'shish</button>
+  </div>
+  <div id="notes"></div>
+</section>
 
-  <!-- Profil -->
-  <section class="page" id="profile">
-    <header>
-      <h1>Profil</h1>
-    </header>
-    <div class="card center">
-      <div class="avatar" id="avatar">?</div>
-      <h2 class="uname">O'quvchi</h2>
-      <p id="username"></p>
-    </div>
-    <div class="card">
-      <div class="row"><span>Eslatmalar</span><b id="statNotes">0</b></div>
-      <div class="row"><span>Quiz natijasi</span><b id="statQuiz">0 / 0</b></div>
-    </div>
-  </section>
+<section class="page" id="profile">
+  <div class="head"><h1>Profil</h1></div>
+  <div class="card center">
+    <div class="avatar" id="avatar">?</div>
+    <h2 class="uname">O'quvchi</h2>
+    <p class="meta" id="uname2"></p>
+    <span class="lvl" id="lvlTag">1-daraja</span>
+  </div>
+  <div class="card">
+    <div class="row"><span>Jami ball</span><b id="pPts">0</b></div>
+    <div class="row"><span>Berilgan savollar</span><b id="pAsk">0</b></div>
+    <div class="row"><span>Quiz to'g'ri javoblari</span><b id="pQuiz">0</b></div>
+    <div class="row"><span>Bajarilgan vazifalar</span><b id="pDone">0</b></div>
+  </div>
+</section>
 </div>
 
-<nav>
-  <div>
-    <button class="active" data-page="home"><span class="ic">🏠</span>Bosh sahifa</button>
-    <button data-page="quiz"><span class="ic">🧠</span>Quiz</button>
-    <button data-page="diary"><span class="ic">📅</span>Kundalik</button>
-    <button data-page="profile"><span class="ic">👤</span>Profil</button>
-  </div>
-</nav>
+<nav><div>
+  <button class="active" data-p="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>Bosh sahifa</button>
+  <button data-p="quiz"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 115 0c0 1.7-2.5 2-2.5 4M12 17h.01"/></svg>Quiz</button>
+  <button data-p="diary"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Kundalik</button>
+  <button data-p="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>Profil</button>
+</div></nav>
 
 <script>
-// ---------- Telegram SDK ----------
+// 3-bosqichda server manzili shu yerga yoziladi (masalan "https://maktab-ai.onrender.com")
+const API_URL = "";
+
 const tg = window.Telegram && Telegram.WebApp;
-if (tg) {
-  tg.ready();
-  tg.expand();
-  try { tg.setHeaderColor('#16140f'); tg.setBackgroundColor('#16140f'); } catch (e) {}
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('#14120d'); tg.setBackgroundColor('#14120d'); } catch (e) {} }
+const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+const $ = id => document.getElementById(id);
+const haptic = () => { try { tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+const store = {
+  get(k, d) { try { const v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+
+// Foydalanuvchi
+const fname = user ? user.first_name : "o'quvchi";
+if (user) document.querySelectorAll('.uname').forEach(e => e.textContent = user.first_name);
+$('uname2').textContent = user && user.username ? '@' + user.username : 'Telegram orqali kirgan';
+if (user && user.photo_url) { const im = document.createElement('img'); im.src = user.photo_url; im.alt = ''; $('avatar').textContent = ''; $('avatar').appendChild(im); }
+else $('avatar').textContent = fname.charAt(0).toUpperCase();
+
+// Holat
+const S = store.get('stats', { pts: 0, asked: 0, quizOk: 0 });
+let notes = store.get('notes', []);
+function renderStats() {
+  const lvl = Math.floor(S.pts / 50) + 1;
+  $('sPts').textContent = S.pts; $('sAsk').textContent = S.asked; $('sLvl').textContent = lvl;
+  $('pPts').textContent = S.pts; $('pAsk').textContent = S.asked; $('pQuiz').textContent = S.quizOk;
+  $('pDone').textContent = notes.filter(n => n.done).length; $('lvlTag').textContent = lvl + '-daraja';
+  store.set('stats', S);
 }
-const user = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) || null;
-const firstName = user ? user.first_name : "o'quvchi";
-document.querySelectorAll('.uname').forEach(el => el.textContent = user ? user.first_name : el.textContent);
-document.getElementById('username').textContent = user && user.username ? '@' + user.username : 'Telegram orqali kirilgan';
-const av = document.getElementById('avatar');
-if (user && user.photo_url) av.innerHTML = '<img src="' + user.photo_url + '" alt="">';
-else av.textContent = firstName.charAt(0).toUpperCase();
 
-// ---------- Navigatsiya ----------
-const pages = document.querySelectorAll('.page');
+// Navigatsiya
 const navBtns = document.querySelectorAll('nav button');
-navBtns.forEach(b => b.addEventListener('click', () => {
-  pages.forEach(p => p.classList.toggle('active', p.id === b.dataset.page));
+navBtns.forEach(b => b.onclick = () => {
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === b.dataset.p));
   navBtns.forEach(n => n.classList.toggle('active', n === b));
-  if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged();
-  window.scrollTo(0, 0);
-}));
-
-// ---------- Bosh sahifa ----------
-let subject = 'math';
-document.querySelectorAll('.subject').forEach(b => b.addEventListener('click', () => {
-  subject = b.dataset.subject;
-  document.querySelectorAll('.subject').forEach(s => s.classList.toggle('on', s === b));
-}));
-document.getElementById('askBtn').addEventListener('click', () => {
-  const q = document.getElementById('question').value.trim();
-  const out = document.getElementById('answer');
-  if (!q) { out.textContent = 'Avval savolingizni yozing.'; return; }
-  // 3-bosqichda bu yerga AI (backend) ulanadi
-  out.textContent = 'AI hali ulanmagan. 3-bosqichda shu yerda javob chiqadi.\n\nFan: ' + (subject === 'math' ? 'Matematika' : 'Ingliz tili');
+  haptic(); window.scrollTo(0, 0);
 });
 
-// ---------- Quiz (namuna savollar) ----------
-const questions = [
-  { q: '12 × 8 nechaga teng?', o: ['86', '96', '104'], a: 1 },
-  { q: '"Apple" so\'zining tarjimasi?', o: ['Nok', 'Olma', 'Anor'], a: 1 },
-  { q: '"I ___ a student." Bo\'sh joyga qo\'ying.', o: ['is', 'are', 'am'], a: 2 }
+// Bosh sahifa: fan, namunalar, chat
+let subject = 'math';
+const samples = {
+  math: ['12 × 8 + 15 ni yech', 'Kasrlarni qo\'shishni tushuntir', 'Tenglama: 3x + 5 = 20', 'Pifagor teoremasi nima?'],
+  english: ['Present Simple qoidasi', '"Kitob" inglizchada?', 'I am go to school — xato bormi?', 'To be fe\'lini tushuntir']
+};
+function renderChips() {
+  $('chips').innerHTML = '';
+  samples[subject].forEach(t => { const c = document.createElement('button'); c.className = 'chip'; c.textContent = t; c.onclick = () => ask(t); $('chips').appendChild(c); });
+}
+document.querySelectorAll('#seg button').forEach(b => b.onclick = () => {
+  subject = b.dataset.s;
+  document.querySelectorAll('#seg button').forEach(x => x.classList.toggle('on', x === b));
+  renderChips(); haptic();
+});
+function addMsg(who, text) {
+  const e = $('empty'); if (e) e.remove();
+  const m = document.createElement('div'); m.className = 'msg ' + who; m.textContent = text;
+  $('chat').appendChild(m); $('chat').scrollTop = $('chat').scrollHeight; return m;
+}
+async function ask(text) {
+  text = text.trim(); if (!text) return;
+  $('q').value = ''; $('go').disabled = true;
+  addMsg('user', text);
+  const t = addMsg('ai', 'O\'ylayapman...'); t.classList.add('typing');
+  try {
+    if (!API_URL) { await new Promise(r => setTimeout(r, 600)); t.textContent = 'AI server hali ulanmagan. Keyingi qadamda ulaymiz.'; }
+    else {
+      const r = await fetch(API_URL + '/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: text, subject, initData: tg ? tg.initData : '' }) });
+      const d = await r.json(); t.textContent = d.answer || 'Javob kelmadi.';
+      S.asked++; S.pts++; renderStats();
+    }
+  } catch (e) { t.textContent = 'Aloqa xatosi. Qayta urinib ko\'ring.'; }
+  t.classList.remove('typing'); $('chat').scrollTop = $('chat').scrollHeight; $('go').disabled = false;
+}
+$('go').onclick = () => ask($('q').value);
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') ask($('q').value); });
+renderChips();
+
+// Quiz
+const bank = [
+  { s: 'math', q: '12 × 8 = ?', o: ['86', '96', '104'], a: 1 },
+  { s: 'math', q: '144 ning kvadrat ildizi?', o: ['11', '12', '14'], a: 1 },
+  { s: 'math', q: '3x + 5 = 20 bo\'lsa, x = ?', o: ['5', '6', '15'], a: 0 },
+  { s: 'math', q: '1/2 + 1/4 = ?', o: ['2/6', '3/4', '1/8'], a: 1 },
+  { s: 'math', q: 'To\'g\'ri to\'rtburchak: 6 va 4. Yuzi?', o: ['10', '20', '24'], a: 2 },
+  { s: 'english', q: '"Apple" tarjimasi?', o: ['Nok', 'Olma', 'Anor'], a: 1 },
+  { s: 'english', q: 'I ___ a student.', o: ['is', 'are', 'am'], a: 2 },
+  { s: 'english', q: 'She ___ to school every day.', o: ['go', 'goes', 'going'], a: 1 },
+  { s: 'english', q: '"Book" ko\'plik shakli?', o: ['books', 'bookes', 'bookies'], a: 0 },
+  { s: 'english', q: 'They ___ playing football now.', o: ['is', 'am', 'are'], a: 2 }
 ];
-let qi = 0, score = 0, answered = 0;
-const quizCard = document.getElementById('quizCard');
-function renderQuiz() {
-  if (qi >= questions.length) {
-    quizCard.innerHTML = '<h2>Tugadi!</h2><p>Natija: ' + score + ' / ' + questions.length + '</p><button class="btn" id="again">Qaytadan boshlash</button>';
-    document.getElementById('again').onclick = () => { qi = 0; score = 0; renderQuiz(); };
-    return;
+let qs = [], qi = 0, qscore = 0, qsub = 'all';
+const qBtns = document.querySelectorAll('#qseg button, #qseg2 button');
+qBtns.forEach(b => b.onclick = () => { if (b.disabled) return; qsub = b.dataset.s; qBtns.forEach(x => x.classList.toggle('on', x === b)); startQuiz(); haptic(); });
+function startQuiz() {
+  const pool = bank.filter(x => qsub === 'all' || x.s === qsub);
+  qs = pool.sort(() => Math.random() - .5).slice(0, 5); qi = 0; qscore = 0; renderQ();
+}
+function renderQ() {
+  const c = $('quizCard');
+  if (qi >= qs.length) {
+    c.innerHTML = '<p class="meta center">Natija</p><div class="big">' + qscore + ' / ' + qs.length + '</div><p class="meta center">' +
+      (qscore === qs.length ? 'Ajoyib! Hammasi to\'g\'ri 🎉' : qscore >= 3 ? 'Yaxshi natija!' : 'Yana mashq qiling, uddalaysiz!') + '</p><button class="btn full" id="again">Qaytadan</button>';
+    $('again').onclick = startQuiz; return;
   }
-  const item = questions[qi];
-  quizCard.innerHTML = '<p>Savol ' + (qi + 1) + ' / ' + questions.length + '</p><h2>' + item.q + '</h2>' +
-    item.o.map((t, i) => '<button class="opt" data-i="' + i + '">' + t + '</button>').join('');
-  quizCard.querySelectorAll('.opt').forEach(btn => btn.onclick = () => {
-    const i = +btn.dataset.i;
-    quizCard.querySelectorAll('.opt').forEach(o => o.disabled = true);
-    quizCard.querySelectorAll('.opt')[item.a].classList.add('right');
-    answered++;
-    if (i === item.a) score++; else btn.classList.add('wrong');
-    document.getElementById('statQuiz').textContent = score + ' / ' + answered;
-    setTimeout(() => { qi++; renderQuiz(); }, 900);
+  const it = qs[qi];
+  c.innerHTML = '<div class="bar"><i style="width:' + (qi / qs.length * 100) + '%"></i></div><p class="meta">Savol ' + (qi + 1) + ' / ' + qs.length + '</p><h2>' + it.q + '</h2>' +
+    it.o.map((t, i) => '<button class="opt" data-i="' + i + '">' + t + '</button>').join('');
+  c.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    const i = +b.dataset.i, all = c.querySelectorAll('.opt');
+    all.forEach(o => o.disabled = true); all[it.a].classList.add('right');
+    if (i === it.a) { qscore++; S.pts += 10; S.quizOk++; renderStats(); } else b.classList.add('wrong');
+    setTimeout(() => { qi++; renderQ(); }, 850);
   });
 }
-renderQuiz();
+startQuiz();
 
-// ---------- Kundalik ----------
-// Hozircha xotirada saqlanadi. 3-bosqichda bazaga ulanadi.
-let notes = [];
-const notesBox = document.getElementById('notes');
+// Kundalik
 function renderNotes() {
-  document.getElementById('statNotes').textContent = notes.length;
-  if (!notes.length) { notesBox.innerHTML = '<div class="card"><p>Hozircha eslatma yo\'q. Birinchisini yuqorida yozing.</p></div>'; return; }
-  notesBox.innerHTML = notes.map((n, i) =>
-    '<div class="card note"><span></span><button aria-label="O\'chirish" data-i="' + i + '">✕</button></div>').join('');
-  notesBox.querySelectorAll('.note').forEach((el, i) => el.firstChild.textContent = notes[i]);
-  notesBox.querySelectorAll('button').forEach(b => b.onclick = () => { notes.splice(+b.dataset.i, 1); renderNotes(); });
+  const box = $('notes'); box.innerHTML = '';
+  if (!notes.length) { box.innerHTML = '<div class="card center meta">Hozircha eslatma yo\'q.</div>'; renderStats(); return; }
+  notes.forEach((n, i) => {
+    const d = document.createElement('div'); d.className = 'card note' + (n.done ? ' done' : '');
+    const chk = document.createElement('button'); chk.className = 'chk'; chk.textContent = n.done ? '✓' : ''; chk.setAttribute('aria-label', 'Bajarildi');
+    chk.onclick = () => { n.done = !n.done; store.set('notes', notes); renderNotes(); haptic(); };
+    const t = document.createElement('div'); t.className = 't';
+    const sp = document.createElement('span'); sp.textContent = n.text;
+    const sm = document.createElement('small'); sm.textContent = n.date;
+    t.append(sp, sm);
+    const del = document.createElement('button'); del.className = 'del'; del.textContent = '✕'; del.setAttribute('aria-label', 'O\'chirish');
+    del.onclick = () => { notes.splice(i, 1); store.set('notes', notes); renderNotes(); };
+    d.append(chk, t, del); box.appendChild(d);
+  });
+  renderStats();
 }
 function addNote() {
-  const inp = document.getElementById('noteInput');
-  const v = inp.value.trim();
-  if (!v) return;
-  notes.unshift(v); inp.value = ''; renderNotes();
+  const v = $('noteIn').value.trim(); if (!v) return;
+  notes.unshift({ text: v, done: false, date: new Date().toLocaleDateString('uz-UZ') });
+  store.set('notes', notes); $('noteIn').value = ''; renderNotes();
 }
-document.getElementById('addNote').onclick = addNote;
-document.getElementById('noteInput').addEventListener('keydown', e => { if (e.key === 'Enter') addNote(); });
+$('addNote').onclick = addNote;
+$('noteIn').addEventListener('keydown', e => { if (e.key === 'Enter') addNote(); });
 renderNotes();
 </script>
 </body>
