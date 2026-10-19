@@ -116,12 +116,6 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-o
 #splash.hide{opacity:0;pointer-events:none}
 #splash .logo{width:94px;height:94px;border-radius:30px;display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:800;color:var(--gold2);background:var(--g1);border:2px solid var(--gold);box-shadow:0 0 56px rgba(240,194,75,.5);animation:pulse 2s infinite}
 #splash p{color:var(--gold2);letter-spacing:.22em;text-transform:uppercase;font-size:13px}
-.langs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px}
-textarea,select{width:100%;background:var(--g1);border:1px solid var(--line);color:var(--text);border-radius:18px;padding:13px 15px;font:inherit;resize:none;-webkit-backdrop-filter:blur(26px);backdrop-filter:blur(26px)}
-select{padding:11px 10px;font-weight:700}
-select option{color:#111}
-textarea:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
-#trOut{font-size:18px;margin:6px 0 10px;white-space:pre-wrap;word-wrap:break-word}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -146,8 +140,7 @@ textarea:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
     <button class="tile feat" data-go="ai"><span class="ic">✨</span><b>AI bilan suhbat</b><span class="d">Istalgan savolingni ber, birga o'rganamiz</span></button>
     <button class="tile" data-go="quiz"><span class="ic">🧠</span><b>Quiz</b><span class="d">Bilimingni sina</span></button>
     <button class="tile" data-go="diary"><span class="ic">📅</span><b>Kundalik</b><span class="d">Vazifalar</span></button>
-    <button class="tile" data-go="tr"><span class="ic">🌐</span><b>Tarjimon</b><span class="d">UZ · EN · RU</span></button>
-    <button class="tile" id="essayTile"><span class="ic">✍️</span><b>Insho</b><span class="d">AI bilan yozing</span></button>
+    <button class="tile wide" id="essayTile"><span class="ic">✍️</span><b>Insho</b><span class="d">AI bilan yozing</span></button>
   </div>
   <div class="card tip"><small>Kun maslahati</small><p id="tip"></p></div>
 </section>
@@ -163,20 +156,6 @@ textarea:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
   <div class="head"><div><h1>Quiz</h1><p>Har to'g'ri javob +10 ball</p></div></div>
   <div class="seg" id="qseg"><button class="on" data-s="all">Aralash</button><button data-s="math">Matematika</button><button data-s="english">Ingliz tili</button></div>
   <div class="card" id="quizCard"></div>
-</section>
-
-<section class="page" id="tr">
-  <div class="head"><div><h1>Tarjimon</h1><p>O'zbek, ingliz va rus tillari</p></div></div>
-  <div class="card">
-    <div class="langs">
-      <select id="fromL" aria-label="Qaysi tildan"><option value="uz">O'zbekcha</option><option value="en">Inglizcha</option><option value="ru">Ruscha</option></select>
-      <button class="ghost" id="swap" aria-label="Almashtirish">⇄</button>
-      <select id="toL" aria-label="Qaysi tilga"><option value="en" selected>Inglizcha</option><option value="uz">O'zbekcha</option><option value="ru">Ruscha</option></select>
-    </div>
-    <textarea id="trIn" rows="4" placeholder="Matnni yozing..."></textarea>
-    <button class="btn full" id="trGo">Tarjima qilish</button>
-  </div>
-  <div class="card" id="trOutCard" style="display:none"><p class="meta" id="trLbl"></p><p id="trOut"></p><button class="ghost" id="trCopy">Nusxalash</button></div>
 </section>
 
 <section class="page" id="diary">
@@ -313,17 +292,20 @@ async function ask(text) {
   $('q').value = ''; $('go').disabled = true;
   addMsg('user', text);
   const t = addMsg('ai', ''); t.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>';
-  let ans;
+  let ans, ok = false;
   try {
     if (!API_URL) { await sleep(1100); ans = 'Bu namuna javob. Server ulangach, haqiqiy AI javobi shu yerda chiqadi.'; }
     else {
       const r = await fetch(API_URL + '/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: text, history: hist.slice(-10), initData: tg ? tg.initData : '' }) });
       const d = await r.json(); ans = d.answer || 'Javob kelmadi.';
+      ok = r.ok && d.ok === true;
     }
+  } catch (e) { ans = 'Aloqa xatosi. Qayta urinib ko\'ring.'; }
+  if (ok) {
     hist.push({ r: 'user', t: text }, { r: 'model', t: ans }); hist = hist.slice(-20); store.set('hist', hist);
     S.asked++; S.pts++; bump();
-  } catch (e) { ans = 'Aloqa xatosi. Qayta urinib ko\'ring.'; }
+  }
   t.textContent = ans; $('chat').scrollTop = $('chat').scrollHeight; $('go').disabled = false;
 }
 $('go').onclick = () => ask($('q').value);
@@ -393,42 +375,6 @@ function addNote() {
 $('addNote').onclick = addNote;
 $('noteIn').addEventListener('keydown', e => { if (e.key === 'Enter') addNote(); });
 renderNotes();
-// Tarjimon (hozircha kichik lug'at; server ulangach AI gaplarni ham tarjima qiladi)
-const LN = { uz: "O'zbekcha", en: 'Inglizcha', ru: 'Ruscha' };
-const D = "olma=apple,kitob=book,maktab=school,o'qituvchi=teacher,o'quvchi=student,dars=lesson,uy=house,do'st=friend,suv=water,non=bread,salom=hello,rahmat=thanks,xayr=goodbye,ha=yes,yo'q=no,katta=big,kichik=small,yaxshi=good,yomon=bad,bugun=today,ertaga=tomorrow,kecha=yesterday,ona=mother,ota=father,shahar=city,mashina=car,qalam=pencil,daftar=notebook,stol=table,stul=chair,quyosh=sun,oy=moon,kun=day,tun=night,sevgi=love,vatan=homeland,bola=child,ism=name,vaqt=time,odam=person".split(',').map(x => x.split('='));
-function dictTr(text, from, to) {
-  if (from === to) return text;
-  if (!((from === 'uz' && to === 'en') || (from === 'en' && to === 'uz'))) return null;
-  const i = from === 'uz' ? 0 : 1, j = 1 - i, m = {};
-  D.forEach(x => m[x[i]] = x[j]);
-  const words = text.split(/\s+/); let hit = 0;
-  const out = words.map(w => { const r = m[w.toLowerCase().replace(/[.,!?;:]/g, '')]; if (r) { hit++; return r; } return '[' + w + ']'; }).join(' ');
-  return hit ? out : null;
-}
-$('trGo').onclick = async () => {
-  const txt = $('trIn').value.trim(); if (!txt) return;
-  const from = $('fromL').value, to = $('toL').value;
-  $('trOutCard').style.display = 'block'; $('trLbl').textContent = LN[from] + ' → ' + LN[to]; $('trOut').textContent = '...';
-  let res;
-  if (API_URL) {
-    try {
-      const r = await fetch(API_URL + '/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: txt, from, to, initData: tg ? tg.initData : '' }) });
-      const d = await r.json(); res = d.answer || 'Javob kelmadi.';
-    } catch (e) { res = 'Aloqa xatosi. Qayta urinib ko\'ring.'; }
-  } else {
-    res = dictTr(txt, from, to);
-    if (res === null) res = 'Hozircha faqat oddiy so\'zlar (o\'zbek ⇄ ingliz) tarjima qilinadi. Gaplar va rus tili AI ulangach ishlaydi.';
-  }
-  $('trOut').textContent = res;
-};
-$('swap').onclick = () => { const a = $('fromL').value; $('fromL').value = $('toL').value; $('toL').value = a; haptic(); };
-$('trCopy').onclick = async () => {
-  const t = $('trOut').textContent;
-  try { await navigator.clipboard.writeText(t); }
-  catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (x) {} ta.remove(); }
-  $('trCopy').textContent = 'Nusxalandi ✓'; setTimeout(() => $('trCopy').textContent = 'Nusxalash', 1500);
-};
 setTimeout(() => $('splash').classList.add('hide'), 900);
 </script>
 </body>
